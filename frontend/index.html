@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10263d">
+    <title>ARINC-429-completo | Banco de pruebas</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="ARINC-429-completo, inicio">
+        <span class="brand-mark">429</span>
+        <span>ARINC-429<span class="brand-light">-completo</span></span>
+      </a>
+      <span class="environment">BANCO DE PRUEBAS</span>
+    </header>
+
+    <main class="page">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">GESTIÓN DEL SISTEMA</p>
+          <h1>Instrumentos y envíos</h1>
+          <p class="subtitle">Administrá instrumentos y validá palabras antes de transmitirlas.</p>
+        </div>
+        <div class="summary" aria-live="polite">
+          <span id="instrument-count">0</span>
+          <small>instrumentos</small>
+        </div>
+      </section>
+
+      <div id="notice" class="notice" role="status" hidden></div>
+
+      <section class="layout">
+        <div class="primary-column">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">CONFIGURACIÓN</p>
+                <h2>Instrumentos</h2>
+              </div>
+              <button id="new-instrument" class="button button-secondary" type="button">Nuevo instrumento</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Instrumento</th>
+                    <th>Label</th>
+                    <th>Rango</th>
+                    <th>Codificación</th>
+                    <th>Configuración</th>
+                    <th><span class="visually-hidden">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody id="instrument-rows">
+                  <tr><td class="empty-cell" colspan="6">Cargando instrumentos…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">HISTORIAL</p>
+                <h2>Envíos</h2>
+              </div>
+              <span class="muted">Los envíos no se transmiten al hardware.</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha y hora</th>
+                    <th>Instrumento</th>
+                    <th>Valor</th>
+                    <th>Validación</th>
+                    <th>Palabra ARINC (32 bits)</th>
+                    <th><span class="visually-hidden">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody id="send-rows">
+                  <tr><td class="empty-cell" colspan="6">Cargando envíos…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel send-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">VALIDACIÓN</p>
+              <h2>Nuevo envío</h2>
+            </div>
+          </div>
+          <form id="send-form">
+            <label for="send-instrument">Instrumento</label>
+            <select id="send-instrument" name="instrument_id" required>
+              <option value="">Seleccioná un instrumento</option>
+            </select>
+
+            <label for="send-value">Valor a transmitir</label>
+            <input id="send-value" name="value" type="number" step="any" required>
+
+            <button class="button button-primary full-width" type="submit">Validar y generar</button>
+          </form>
+          <p class="form-hint">Fuera de rango: rechazado. En rango y sin configuración completa: queda pendiente.</p>
+        </aside>
+      </section>
+    </main>
+
+    <dialog id="instrument-dialog" class="dialog">
+      <form id="instrument-form" class="dialog-form">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">FICHA TÉCNICA</p>
+            <h2 id="dialog-title">Nuevo instrumento</h2>
+          </div>
+          <button id="close-dialog" class="icon-button" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <input id="instrument-id" name="id" type="hidden">
+
+        <div class="form-grid">
+          <div class="field-span">
+            <label for="instrument-name">Nombre</label>
+            <input id="instrument-name" name="name" maxlength="120" required>
+          </div>
+          <div>
+            <label for="instrument-label">Label ARINC (octal)</label>
+            <input id="instrument-label" name="arinc_label" inputmode="numeric" pattern="[0-7]{1,3}" placeholder="Ej.: 203" required>
+          </div>
+          <div>
+            <label for="encoding-type">Tipo de codificación</label>
+            <select id="encoding-type" name="encoding_type" required>
+              <option value="BNR">BNR</option>
+              <option value="BCD">BCD</option>
+              <option value="DISCRETE">DISCRETE</option>
+              <option value="CUSTOM">CUSTOM</option>
+            </select>
+          </div>
+          <div>
+            <label for="min-value">Valor mínimo</label>
+            <input id="min-value" name="min_value" type="number" step="any" required>
+          </div>
+          <div>
+            <label for="max-value">Valor máximo</label>
+            <input id="max-value" name="max_value" type="number" step="any" required>
+          </div>
+          <div class="field-span">
+            <label for="arinc-config">Configuración ARINC individual (JSON)</label>
+            <textarea id="arinc-config" name="arinc_config" rows="6" spellcheck="false" placeholder="Dejalo vacío hasta contar con los parámetros reales."></textarea>
+            <small>Para generar BNR se requieren sdi, ssm, resolution, offset y sign_mode.</small>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button id="cancel-dialog" class="button button-secondary" type="button">Cancelar</button>
+          <button class="button button-primary" type="submit">Guardar instrumento</button>
+        </div>
+      </form>
+    </dialog>
+
+    <footer>ARINC-429-completo <span>·</span> Primera etapa — sin comunicación serial</footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
